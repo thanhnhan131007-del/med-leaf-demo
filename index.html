@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MED-LEAF 5G - Demo Hệ thống</title>
+    <style>
+        :root {
+            --primary: #047857; /* Xanh Tràm */
+            --primary-light: #d1fae5;
+            --dark: #1f2937;
+            --gray: #f3f4f6;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #e5e7eb;
+            color: var(--dark);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* BỐ CỤC CHIA ĐÔI MÀN HÌNH */
+        .front-end, .back-end {
+            flex: 1;
+            padding: 20px 40px;
+            overflow-y: auto;
+        }
+
+        .front-end {
+            background-color: #ffffff;
+            border-right: 4px solid #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-end {
+            background-color: #f8fafc;
+        }
+
+        h2 {
+            color: var(--primary);
+            text-align: center;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        /* KHU VỰC FRONT-END (TRẠM IOT) */
+        .machine-mockup {
+            background-color: var(--gray);
+            border: 2px solid #9ca3af;
+            border-radius: 20px;
+            width: 300px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .led-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--success);
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px var(--success);
+            transition: all 0.3s;
+        }
+
+        .rfid-zone {
+            width: 80%;
+            height: 150px;
+            border: 2px dashed #9ca3af;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            background-color: #fff;
+            color: #6b7280;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .dispense-btn {
+            margin-top: 40px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+
+        .dispense-btn:hover {
+            background-color: #065f46;
+        }
+
+        .dispense-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* KHU VỰC BACK-END (DASHBOARD) */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary);
+            transition: all 0.3s;
+        }
+
+        .kpi-title {
+            font-size: 14px;
+            color: #6b7280;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .kpi-sub {
+            font-size: 13px;
+            color: var(--success);
+            margin-top: 5px;
+        }
+
+        /* Alert State */
+        .kpi-card.alert {
+            border-left: 5px solid var(--danger);
+            background-color: var(--danger-light);
+            animation: pulse 2s infinite;
+        }
+        .kpi-card.alert .kpi-value, .kpi-card.alert .kpi-title {
+            color: var(--danger);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* Bảng log */
+        .log-table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        tr:first-child td {
+            background-color: var(--primary-light);
+            transition: background-color 1s ease;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+
+    </style>
+</head>
+<body>
+
+    <!-- FRONT-END: MÔ PHỎNG TRẠM IOT -->
+    <div class="front-end">
+        <h2>THỰC ĐỊA: TRẠM REFILL IOT</h2>
+        
+        <div class="machine-mockup">
+            <h3 style="margin-top: 0;">MED-LEAF 5G</h3>
+            <div id="led" class="led-indicator"></div>
+            <div id="machine-status" style="font-weight: bold; color: var(--success);">HỆ THỐNG SẴN SÀNG</div>
+            
+            <div class="rfid-zone" id="rfid-zone">
+                KHU VỰC CẢM BIẾN<br>QUÉT THẺ RFID
+            </div>
+            
+            <button id="btn-dispense" class="dispense-btn" onclick="simulateNurseAction()">
+                🪪 ĐIỀU DƯỠNG A QUÉT THẺ
+            </button>
+        </div>
+        <p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 14px;">
+            *Nút này mô phỏng hành động điều dưỡng quẹt thẻ RFID và hứng chai nhôm.
+        </p>
+    </div>
+
+    <!-- BACK-END: CLOUD DASHBOARD CỦA KSNK -->
+    <div class="back-end">
+        <h2>CLOUD: ADMIN DASHBOARD KSNK</h2>
+        
+        <div class="kpi-grid">
+            <div class="kpi-card" id="card-volume">
+                <div class="kpi-title">Dung lượng Túi Doypack (Cấp Cứu)</div>
+                <div class="kpi-value" id="val-volume">600 ml</div>
+                <div class="kpi-sub" id="sub-volume">Mức an toàn</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Tỷ lệ tuân thủ vệ sinh tay</div>
+                <div class="kpi-value" id="val-compliance">84.5%</div>
+                <div class="kpi-sub" id="sub-compliance">↑ Tăng so với ca trước</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Vỏ chai nhựa tiết kiệm được</div>
+                <div class="kpi-value" id="val-bottles">124</div>
+                <div class="kpi-sub">~ Đã giảm 1.86 kg rác y tế</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Ngân sách tiêu hủy tiết kiệm</div>
+                <div class="kpi-value" id="val-money">1.860.000 đ</div>
+                <div class="kpi-sub">Tính từ đầu tháng</div>
+            </div>
+        </div>
+
+        <div class="log-table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Mã Ẩn Danh (AI)</th>
+                        <th>Khoa/Trạm</th>
+                        <th>Hành động</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody id="log-body">
+                    <!-- Logs sẽ được JS thêm vào đây -->
+                    <tr>
+                        <td>14:02:15</td>
+                        <td>User_B_042</td>
+                        <td>Hồi sức tích cực</td>
+                        <td>Nạp 50ml</td>
+                        <td><span class="badge badge-success">Thành công</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT XỬ LÝ LOGIC -->
+    <script>
+        // Khởi tạo biến trạng thái (State)
+        let currentVolume = 600; // Setup cố tình để 600ml để 2 lần click nữa là chạm mốc cảnh báo < 500ml
+        let complianceRate = 84.5;
+        let bottlesSaved = 124;
+        let moneySaved = 1860000;
+
+        function simulateNurseAction() {
+            const btn = document.getElementById('btn-dispense');
+            const led = document.getElementById('led');
+            const status = document.getElementById('machine-status');
+            const rfidZone = document.getElementById('rfid-zone');
+
+            // 1. FRONT-END MÔ PHỎNG HÀNH ĐỘNG BƠM
+            btn.disabled = true;
+            led.style.backgroundColor = '#f59e0b'; // Đổi đèn vàng
+            led.style.boxShadow = '0 0 10px #f59e0b';
+            status.innerText = 'ĐANG CHIẾT RÓT 50ML...';
+            status.style.color = '#f59e0b';
+            rfidZone.innerHTML = '🔄 Đang bơm dung dịch...';
+            rfidZone.style.borderColor = '#f59e0b';
+
+            // Giả lập độ trễ (delay) của máy bơm IoT là 1.5 giây
+            setTimeout(() => {
+                // Khôi phục trạng thái máy
+                btn.disabled = false;
+                led.style.backgroundColor = 'var(--success)';
+                led.style.boxShadow = '0 0 10px var(--success)';
+                status.innerText = 'HỆ THỐNG SẴN SÀNG';
+                status.style.color = 'var(--success)';
+                rfidZone.innerHTML = '✅ HOÀN TẤT<br>Xin mời lấy chai';
+                rfidZone.style.borderColor = 'var(--success)';
+
+                setTimeout(() => {
+                    rfidZone.innerHTML = 'KHU VỰC CẢM BIẾN<br>QUÉT THẺ RFID';
+                    rfidZone.style.borderColor = '#9ca3af';
+                }, 2000);
+
+                // 2. BACK-END CẬP NHẬT DỮ LIỆU ĐÁM MÂY (CLOUD)
+                updateDashboard();
+
+            }, 1500);
+        }
+
+        function updateDashboard() {
+            // Tính toán logic
+            currentVolume -= 50; 
+            complianceRate += 0.2; // Tăng tỷ lệ tuân thủ lên
+            bottlesSaved += 1; // Tiết kiệm 1 chai nhựa 50ml
+            moneySaved += 15000; // Tăng tiền tiết kiệm (ước tính)
+
+            // Cập nhật DOM KSNK
+            const volCard = document.getElementById('card-volume');
+            const volVal = document.getElementById('val-volume');
+            const volSub = document.getElementById('sub-volume');
+
+            volVal.innerText = currentVolume + ' ml';
+            
+            // Logic Cảnh báo Cạn (Predictive Maintenance AI)
+            if (currentVolume <= 500) {
+                volCard.classList.add('alert');
+                volSub.innerText = '⚠️ MỨC CẢNH BÁO (<10%) - CẦN THAY TÚI MỚI!';
+            }
+
+            document.getElementById('val-compliance').innerText = complianceRate.toFixed(1) + '%';
+            document.getElementById('val-bottles').innerText = bottlesSaved;
+            
+            // Format tiền VNĐ
+            let formattedMoney = moneySaved.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            document.getElementById('val-money').innerText = formattedMoney + ' đ';
+
+            // Cập nhật bảng Log (Bắn dữ liệu thời gian thực lên top)
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                               now.getMinutes().toString().padStart(2, '0') + ':' + 
+                               now.getSeconds().toString().padStart(2, '0');
+
+            const newRow = `
+                <tr>
+                    <td>${timeString}</td>
+                    <td><b>User_A_001</b></td>
+                    <td>Cấp cứu</td>
+                    <td>Nạp 50ml</td>
+                    <td><span class="badge badge-success">Thành công</span></td>
+                </tr>`;
+            
+            const logBody = document.getElementById('log-body');
+            logBody.insertAdjacentHTML('afterbegin', newRow);
+        }
+    </script>
+</body>
+</html>
